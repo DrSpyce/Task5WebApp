@@ -1,0 +1,31 @@
+﻿@page
+@model IndexModel
+
+@{
+	ViewData["Title"] = "Home page";
+}
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@if (!User.Identity.IsAuthenticated)
+{
+	<div class="text-center">
+		<h1 class="display-4">Welcome</h1>
+	</div>
+	<div class="row justify-content-center">
+		<div class="col-md-4">
+			<form method="post" asp-page-handler="login">
+				<span asp-validation-for="Name" class="text-danger"></span>
+				<div class="form-floating">
+					<input asp-for="Name" class="form-control" autocomplete="username" aria-required="true" />
+					<label asp-for="Name" class="form-label"></label>
+					<div>
+						<button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+}

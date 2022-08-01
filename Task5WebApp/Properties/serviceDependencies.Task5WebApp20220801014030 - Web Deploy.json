@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/task5webappdbserver/databases/Task5WebApp_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:Task5WebAppContext",
+      "dynamicId": null
+    }
+  }
+}

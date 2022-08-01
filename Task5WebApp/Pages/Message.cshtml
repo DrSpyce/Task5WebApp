@@ -1,0 +1,147 @@
+﻿@page
+@model Task5WebApp.Pages.MessageModel
+
+@{
+	ViewData["Title"] = "Message";
+}
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+	<script>
+		$(document).ready(function () {
+			$('#nameOfRecipient').autocomplete({
+				source: '@Url.Page("Message", "search")'
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			var result = setInterval(ajaxCall, 5000);
+		});
+
+		function ajaxCall() {
+			$.ajax({
+				type: "GET",
+				url: '@Url.Page("Message", "update")',
+				data: "{}",
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (result) {
+					var numberOfMessages = $('#numberOfMessages').text();
+					if (Object.keys(result).length > numberOfMessages) {
+						for (var i = numberOfMessages; i < Object.keys(result).length; i++) {
+							var $tr = $('<tr>').append(
+								$('<td>').text(result[i].sender),
+								$('<td>').text(result[i].timeOfSending),
+								$('<td>').append('<button class="btn btn-link link-secondary" onclick="ajaxCallId('+result[i].id+')">'+result[i].title+'</button>')
+							).appendTo('#tbody');
+						}
+						$('#numberOfMessages').text(Object.keys(result).length);
+					}
+				}
+			});
+		}
+
+		function ajaxCallId(id) {
+			$.ajax({
+				type: "GET",
+				url: '@Url.Page("Message", "id")',
+				data: "id=" + id,
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function (result) {
+					$('#staticBackdropLabel').text('Title: ' + result[0].title);
+					$('.modal-body').text(result[0].body);
+					const myModal = new bootstrap.Modal('#staticBackdrop');
+					const modalEl = document.getElementById('staticBackdrop');
+					myModal.show(modalEl);
+				}
+			});
+		}
+
+		$('.prevent').click(function (e) {
+			e.preventDefault();
+			ajaxCallId(this.id);
+		})
+	</script>
+}
+@if (Model.Alert != null)
+{
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		@Model.Alert
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+}
+
+<h1 class="text-center">Welcome @Model.CurrentUserName</h1>
+<div class="row justify-content-center">
+	<div class="col-md-4">
+		<form method="post" asp-page-handler="send">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Message.Recipient" class="control-label"></label>
+				<input asp-for="Message.Recipient" class="form-control" id="nameOfRecipient" />
+				<span asp-validation-for="Message.Recipient" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Message.Title" class="control-label"></label>
+				<input asp-for="Message.Title" class="form-control" />
+				<span asp-validation-for="Message.Title" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Message.Body" class="control-label">Message</label>
+				<textarea asp-for="Message.Body" class="form-control"></textarea>
+				<span asp-validation-for="Message.Body" class="text-danger"></span>
+			</div>
+			<div class="form-group text-center mt-2">
+				<input type="submit" value="Send" class="btn btn-primary w-50" />
+			</div>
+		</form>
+	</div>
+</div>
+<p hidden id="numberOfMessages">@Model.Messages.Count</p>
+<div class="row justify-content-center mt-3">
+	<div class="col-md-6 text-center">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Sender</th>
+					<th>Date</th>
+					<th>Title</th>
+				</tr>
+			</thead>
+			<tbody id="tbody">
+				@foreach (var item in Model.Messages)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => item.Sender)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.TimeOfSending)
+						</td>
+						<td>
+							<button class="btn btn-link link-secondary" onclick="ajaxCallId(@item.Id)">@Html.DisplayFor(modelItem => item.Title)</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="staticBackdropLabel"></h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			</div>
+		</div>
+	</div>
+</div>
